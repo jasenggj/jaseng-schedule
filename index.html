@@ -501,7 +501,13 @@
             }
         }
 
-        setTimeout(() => { window.location.reload(); }, 2 * 60 * 60 * 1000);
+        // 10분(600,000밀리초)마다 화면 깜빡임 없이 뒷단에서 CSV만 새로 읽어오기
+setInterval(() => {
+    initData(); 
+}, 10 * 60 * 1000); 
+
+// 혹시 모를 TV 메모리 부족 현상(렉)을 방지하기 위해 새벽에 한 번씩만 전체 새로고침
+setTimeout(() => { window.location.reload(true); }, 12 * 60 * 60 * 1000);
         window.addEventListener('resize', adjustScale);
 
         window.onload = function() {
