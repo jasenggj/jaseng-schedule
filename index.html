@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>광주자생한방병원 의료진 진료일정 DID</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Pretendard Web Font -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+    <style>
+        * {
+            font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            overflow: hidden;
+            user-select: none;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #did-canvas {
+            width: 1920px;
+            height: 1080px;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .doctor-card {
+            background: #ffffff;
+            border-radius: 18px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            padding: 12px;
+            overflow: hidden;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body>
+
+    <div id="did-canvas">
+        <!-- Header Bar -->
+        <header class="h-[90px] bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 text-white px-8 flex items-center justify-between border-b-4 border-amber-400 shadow-md flex-shrink-0 relative">
+            <div class="flex-1"></div>
+            
+            <div onclick="handleSecretTitleClick()" title="관리자 진입" class="cursor-pointer select-none text-center flex-1">
+                <h1 class="text-4xl font-black tracking-wider leading-none text-white whitespace-nowrap drop-shadow-sm">
+                    광주자생한방병원 의료진 진료일정
+                </h1>
+            </div>
+
+            <div class="flex-1 flex justify-end">
+                <div class="flex items-center gap-3 bg-white/95 px-4 py-2 rounded-xl border border-blue-200/80 text-xs font-bold text-slate-800 shadow-sm">
+                    <span class="flex items-center gap-1"><span class="text-blue-600 text-lg leading-none">●</span> 진료</span>
+                    <span class="flex items-center gap-1"><span class="text-rose-500 text-lg leading-none">★</span> 야간/연장진료</span>
+                    <span class="flex items-center gap-1"><span class="text-emerald-500 text-lg leading-none">▲</span> 부분진료</span>
+                    <span class="flex items-center gap-1 text-slate-400"><span class="text-slate-400 text-lg leading-none">-</span> 휴진</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="grid grid-cols-5 grid-rows-2 gap-3.5 p-4 flex-grow h-[calc(1080px-90px-35px)]">
+            <!-- Dynamic Doctor Cards -->
+        </main>
+
+        <!-- Bottom Footer Banner -->
+        <footer class="h-[35px] bg-slate-100 border-t border-slate-200 px-8 flex items-center justify-between text-xs font-bold text-slate-600 flex-shrink-0">
+            <span><i class="fa-solid fa-circle-info text-blue-600 mr-1.5"></i> 진료시간표는 병원 사정에 따라 변경될 수 있습니다. 사전 예약 후 내원하시면 대기 시간을 줄이실 수 있습니다.</span>
+            <span class="font-black text-slate-700">문의전화: <strong class="text-rose-600 text-sm">1577-0007</strong></span>
+        </footer>
+    </div>
+
+    <!-- Admin Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-6">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+            <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+                <h2 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-user-shield text-amber-400"></i> 의료진 텍스트 및 진료일정 관리자
+                </h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+            </div>
+
+            <div class="bg-slate-100 px-6 py-2.5 border-b border-slate-200 flex items-center justify-between text-xs font-bold text-slate-700">
+                <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-file-csv text-emerald-600 text-base"></i> 수정 후 <b>[CSV 다운로드]</b>하여 GitHub 저장소에 <b>schedule.csv</b> 파일로 올리면 매직인포 TV에 자동 원격 반영됩니다!
+                </span>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportToCSV()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> CSV 다운로드 (한글)
+                    </button>
+                    <button onclick="document.getElementById('csvFileInput').click()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-upload"></i> CSV 불러오기
+                    </button>
+                    <input type="file" id="csvFileInput" accept=".csv" onchange="importFromCSV(event)" class="hidden">
+                </div>
+            </div>
+
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-grow space-y-6" id="modalDoctorList"></div>
+
+            <div class="bg-slate-100 px-6 py-4 flex items-center justify-between border-t border-slate-200 flex-shrink-0">
+                <button onclick="showResetConfirm()" class="text-rose-600 hover:text-rose-700 font-bold text-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i> 초기 설정으로 복원
+                </button>
+                <div class="flex items-center gap-3">
+                    <button onclick="closeModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-sm">취소</button>
+                    <button onclick="saveChanges()" class="px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl shadow text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> 브라우저 임시 저장
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="resetConfirmModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full border border-slate-200 text-center space-y-4">
+            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-2xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900">설정 초기화 확인</h3>
+            <p class="text-sm text-slate-600">모든 의료진 설정을 초기 기본 데이터로 복원하시겠습니까?</p>
+            <div class="flex items-center justify-center gap-3 pt-2">
+                <button onclick="closeResetConfirm()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-sm">취소</button>
+                <button onclick="executeResetDefaults()" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow text-sm">초기화 진행</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const days = [
+            { key: 'mon', label: '월' }, { key: 'tue', label: '화' },
+            { key: 'wed', label: '수' }, { key: 'thu', label: '목' },
+            { key: 'fri', label: '금' }, { key: 'sat', label: '토' },
+            { key: 'sun', label: '일' }
+        ];
+
+        // 기본 의료진 상태값 (진료, 야간, 부분, 휴진)
+        const defaultDoctors = [
+            { id: 1, name: "염승철", title: "병원장", dept: "한방침구의학과 전문의", photo: "images/doctor1.webp", schedule: { mon:['진료','진료'], tue:['진료','야간'], wed:['진료','진료'], thu:['진료','진료'], fri:['진료','진료'], sat:['부분','휴진'], sun:['휴진','휴진'] } },
+            { id: 2, name: "김준수", title: "대표원장", dept: "한방재활의학과 전문의", photo: "images/doctor2.webp", schedule: { mon:['진료','진료'], tue:['진료','진료'], wed:['휴진','진료'], thu:['진료','야간'], fri:['진료','진료'], sat:['진료','휴진'], sun:['휴진','휴진'] } },
+            { id: 3, name: "장영우", title: "원장", dept: "한방이비인후피부과 전문의", photo: "images/doctor3.webp", schedule: { mon:['진료','야간'], tue:['진료','진료'], wed:['진료','진료'], thu:['휴진','휴진'], fri:['진료','진료'], sat:['부분','휴진'], sun:['휴진','휴진'] } },
+            { id: 4, name: "이일석", title: "원장", dept: "한방내과 전문의", photo: "images/doctor4.webp", schedule: { mon:['진료','진료'], tue:['휴진','진료'], wed:['진료','야간'], thu:['진료','진료'], fri:['진료','진료'], sat:['진료','휴진'], sun:['휴진','휴진'] } },
+            { id: 5, name: "김동은", title: "원장", dept: "한방재활의학과 전문의", photo: "images/doctor5.webp", schedule: { mon:['진료','진료'], tue:['진료','진료'], wed:['진료','진료'], thu:['진료','야간'], fri:['휴진','진료'], sat:['부분','휴진'], sun:['휴진','휴진'] } },
+            { id: 6, name: "이동근", title: "원장", dept: "한방침구의학과 전문의", photo: "images/doctor6.webp", schedule: { mon:['진료','야간'], tue:['진료','진료'], wed:['진료','진료'], thu:['진료','진료'], fri:['진료','휴진'], sat:['진료','휴진'], sun:['휴진','휴진'] } },
+            { id: 7, name: "강경래", title: "원장", dept: "한방내과 전문의", photo: "images/doctor7.webp", schedule: { mon:['진료','진료'], tue:['진료','야간'], wed:['휴진','진료'], thu:['진료','진료'], fri:['진료','진료'], sat:['부분','휴진'], sun:['휴진','휴진'] } },
+            { id: 8, name: "이영식", title: "원장", dept: "한방신경정신과 전문의", photo: "images/doctor8.webp", schedule: { mon:['휴진','진료'], tue:['진료','진료'], wed:['진료','야간'], thu:['진료','진료'], fri:['진료','진료'], sat:['진료','휴진'], sun:['휴진','휴진'] } },
+            { id: 9, name: "박주헌", title: "원장", dept: "한방침구의학과 전문의", photo: "images/doctor9.webp", schedule: { mon:['진료','진료'], tue:['진료','진료'], wed:['진료','진료'], thu:['휴진','야간'], fri:['진료','진료'], sat:['부분','휴진'], sun:['휴진','휴진'] } },
+            { id: 10, name: "고민석", title: "원장", dept: "한방부인과 전문의", photo: "images/doctor10.webp", schedule: { mon:['진료','야간'], tue:['진료','진료'], wed:['진료','진료'], thu:['진료','진료'], fri:['휴진','진료'], sat:['진료','휴진'], sun:['휴진','휴진'] } }
+        ];
+
+        let doctors = [];
+
+        // 한글, 숫자, 영문 모두를 표준 한글 상태값('진료','야간','부분','휴진')으로 변환해주는 자동 정규화 함수
+        function normalizeStatus(val) {
+            if (!val) return '휴진';
+            const clean = val.toString().trim();
+            
+            // 진료 (1, 진료, jinryo)
+            if (clean === '1' || clean === '진료' || clean === 'jinryo') return '진료';
+            // 야간 (2, 야간, yagan)
+            if (clean === '2' || clean === '야간' || clean === 'yagan') return '야간';
+            // 부분 (3, 부분, bubuon)
+            if (clean === '3' || clean === '부분' || clean === 'bubuon') return '부분';
+            // 휴진 (0, 휴진, hyujin)
+            if (clean === '0' || clean === '휴진' || clean === 'hyujin') return '휴진';
+            
+            return '휴진';
+        }
+
+        // CSV 읽어서 파싱 및 적용
+        async function loadRemoteCSV() {
+            try {
+                const response = await fetch('schedule.csv?t=' + new Date().getTime());
+                if (!response.ok) return false;
+                const text = await response.text();
+                return parseAndApplyCSV(text);
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function parseAndApplyCSV(text) {
+            const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== '');
+            if (lines.length <= 1) return false;
+
+            const newDoctors = [];
+            for (let i = 1; i < lines.length; i++) {
+                const cols = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
+                if (cols.length >= 17) {
+                    const clean = cols.map(c => c.replace(/^"|"$/g, '').trim());
+                    newDoctors.push({
+                        id: parseInt(clean[0]) || (i),
+                        name: clean[1],
+                        title: clean[2],
+                        dept: clean[3],
+                        photo: clean[4] || `images/doctor${i}.webp`,
+                        schedule: {
+                            mon: [normalizeStatus(clean[5]), normalizeStatus(clean[6])],
+                            tue: [normalizeStatus(clean[7]), normalizeStatus(clean[8])],
+                            wed: [normalizeStatus(clean[9]), normalizeStatus(clean[10])],
+                            thu: [normalizeStatus(clean[11]), normalizeStatus(clean[12])],
+                            fri: [normalizeStatus(clean[13]), normalizeStatus(clean[14])],
+                            sat: [normalizeStatus(clean[15]), normalizeStatus(clean[16])],
+                            sun: [normalizeStatus(clean[17]), normalizeStatus(clean[18])]
+                        }
+                    });
+                }
+            }
+            if (newDoctors.length > 0) {
+                doctors = newDoctors;
+                return true;
+            }
+            return false;
+        }
+
+        async function initData() {
+            const loadedCSV = await loadRemoteCSV();
+            if (!loadedCSV) {
+                try {
+                    const saved = localStorage.getItem('jaseng_did_doctors_v13');
+                    doctors = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultDoctors));
+                } catch (e) {
+                    doctors = JSON.parse(JSON.stringify(defaultDoctors));
+                }
+            }
+            renderDID();
+        }
+
+        // 아이콘 렌더링
+        function renderStatusBadge(status) {
+            const norm = normalizeStatus(status);
+            switch(norm) {
+                case '진료': return `<span class="text-blue-600 font-black text-xl leading-none">●</span>`;
+                case '야간': return `<span class="text-rose-500 font-black text-xl leading-none">★</span>`;
+                case '부분': return `<span class="text-emerald-500 font-black text-xl leading-none">▲</span>`;
+                default: return `<span class="text-slate-300 font-black text-lg leading-none">-</span>`;
+            }
+        }
+
+        function renderDID() {
+            const main = document.querySelector('main');
+            main.innerHTML = '';
+
+            doctors.forEach(doc => {
+                const card = document.createElement('div');
+                card.className = 'doctor-card';
+                const photoPath = doc.photo ? doc.photo : `images/doctor${doc.id}.webp`;
+
+                card.innerHTML = `
+                    <div class="w-full h-[200px] rounded-xl bg-slate-100 border border-slate-200/80 overflow-hidden flex items-center justify-center flex-shrink-0 shadow-inner relative">
+                        <img src="${photoPath}" 
+                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'flex flex-col items-center justify-center text-slate-400 p-2 text-center\\'><i class=\\'fa-solid fa-user-doctor text-5xl mb-2 text-slate-300\\'></i><span class=\\'text-xs font-semibold\\'>사진 준비중</span></div>';" 
+                             class="w-full h-full object-cover object-top scale-105 origin-top -translate-y-4">
+                    </div>
+
+                    <div class="mt-2 mb-1 px-0.5 flex items-center justify-center gap-1 whitespace-nowrap overflow-hidden">
+                        <span class="text-[26px] font-black text-slate-900 leading-none tracking-tight flex-shrink-0">${doc.name}</span>
+                        <span class="text-[12px] font-black text-blue-900 bg-blue-100 px-1 py-0.5 rounded border border-blue-200/80 leading-tight flex-shrink-0">${doc.title}</span>
+                        <span class="text-[12px] font-bold text-slate-700 leading-none tracking-tighter truncate">| ${doc.dept}</span>
+                    </div>
+
+                    <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-200/80 flex-grow flex flex-col justify-center w-full">
+                        <table class="w-full h-full text-center border-collapse">
+                            <thead>
+                                <tr class="border-b-2 border-slate-200/80">
+                                    <th class="pb-1 text-xs text-slate-500 font-extrabold w-8">구분</th>
+                                    ${days.map(d => `<th class="pb-1 text-base font-black text-slate-800 ${d.key==='sun'?'text-rose-600':''}">${d.label}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200/60">
+                                <tr>
+                                    <td class="py-1.5 text-xs text-slate-700 font-black bg-slate-200/70 rounded">오전</td>
+                                    ${days.map(d => `<td class="py-1.5">${renderStatusBadge(doc.schedule[d.key]?doc.schedule[d.key][0]:'휴진')}</td>`).join('')}
+                                </tr>
+                                <tr>
+                                    <td class="py-1.5 text-xs text-slate-700 font-black bg-slate-200/70 rounded">오후</td>
+                                    ${days.map(d => `<td class="py-1.5">${renderStatusBadge(doc.schedule[d.key]?doc.schedule[d.key][1]:'휴진')}</td>`).join('')}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                main.appendChild(card);
+            });
+        }
+
+        function openModal() {
+            const list = document.getElementById('modalDoctorList');
+            list.innerHTML = '';
+
+            doctors.forEach((doc, idx) => {
+                const item = document.createElement('div');
+                item.className = "bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3";
+                
+                item.innerHTML = `
+                    <div class="flex items-center gap-4 flex-wrap pb-2 border-b border-slate-200">
+                        <span class="bg-blue-900 text-white text-xs font-bold px-2.5 py-1 rounded">의사 ${idx + 1}</span>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold text-slate-600">성함:</label>
+                            <input type="text" id="doc_name_${idx}" value="${doc.name}" class="border border-slate-300 rounded px-2.5 py-1 text-sm font-bold w-28 focus:outline-blue-600">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-bold text-slate-600">직책:</label>
+                            <input type="text" id="doc_title_${idx}" value="${doc.title}" class="border border-slate-300 rounded px-2.5 py-1 text-sm font-bold w-28 focus:outline-blue-600">
+                        </div>
+                        <div class="flex items-center gap-2 flex-grow">
+                            <label class="text-xs font-bold text-slate-600">진료과목:</label>
+                            <input type="text" id="doc_dept_${idx}" value="${doc.dept}" class="border border-slate-300 rounded px-2.5 py-1 text-sm font-bold w-full focus:outline-blue-600">
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-center border-collapse">
+                            <thead>
+                                <tr class="bg-slate-200/70 text-slate-700">
+                                    <th class="p-1.5">시간</th>
+                                    ${days.map(d => `<th class="p-1.5 ${d.key==='sun'?'text-rose-600 font-bold':''}">${d.label}요일</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold text-slate-600 p-1.5">오전</td>
+                                    ${days.map(d => `
+                                        <td class="p-1">
+                                            <select id="sel_${idx}_${d.key}_0" class="border rounded p-1 text-xs w-full bg-white font-medium">
+                                                <option value="진료" ${(doc.schedule[d.key]&&normalizeStatus(doc.schedule[d.key][0])==='진료')?'selected':''}>● 진료</option>
+                                                <option value="야간" ${(doc.schedule[d.key]&&normalizeStatus(doc.schedule[d.key][0])==='야간')?'selected':''}>★ 야간</option>
+                                                <option value="부분" ${(doc.schedule[d.key]&&normalizeStatus(doc.schedule[d.key][0])==='부분')?'selected':''}>▲ 부분</option>
+                                                <option value="휴진" ${(!doc.schedule[d.key]||normalizeStatus(doc.schedule[d.key][0])==='휴진')?'selected':''}>- 휴진</option>
+                                            </select>
+                                        </td>
+                                    `).join('')}
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-slate-600 p-1.5">오후</td>
+                                    ${days.map(d => `
+                                        <td class="p-1">
+                                            <select id="sel_${idx}_${d.key}_1" class="border rounded p-1 text-xs w-full bg-white font-medium">
+                                                <option value="진료" ${(doc.schedule[d.key]&&normalizeStatus(doc.schedule[d.key][1])==='진료')?'selected':''}>● 진료</option>
+                                                <option value="야간" ${(doc.schedule[d.key]&&normalizeStatus(doc.schedule[d.key][1])==='야간')?'selected':''}>★ 야간</option>
+                                                <option value="부분" ${(doc.schedule[d.key]&&normalizeStatus(doc.schedule[d.key][1])==='부분')?'selected':''}>▲ 부분</option>
+                                                <option value="휴진" ${(!doc.schedule[d.key]||normalizeStatus(doc.schedule[d.key][1])==='휴진')?'selected':''}>- 휴진</option>
+                                            </select>
+                                        </td>
+                                    `).join('')}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('editModal').classList.add('hidden'); }
+
+        function saveChanges() {
+            doctors.forEach((doc, idx) => {
+                doc.name = document.getElementById(`doc_name_${idx}`).value;
+                doc.title = document.getElementById(`doc_title_${idx}`).value;
+                doc.dept = document.getElementById(`doc_dept_${idx}`).value;
+
+                if (!doc.schedule) doc.schedule = {};
+                days.forEach(d => {
+                    const am = document.getElementById(`sel_${idx}_${d.key}_0`).value;
+                    const pm = document.getElementById(`sel_${idx}_${d.key}_1`).value;
+                    doc.schedule[d.key] = [am, pm];
+                });
+            });
+
+            try {
+                localStorage.setItem('jaseng_did_doctors_v13', JSON.stringify(doctors));
+            } catch(e) {}
+
+            renderDID();
+            closeModal();
+        }
+
+        function showResetConfirm() { document.getElementById('resetConfirmModal').classList.remove('hidden'); }
+        function closeResetConfirm() { document.getElementById('resetConfirmModal').classList.add('hidden'); }
+
+        function executeResetDefaults() {
+            doctors = JSON.parse(JSON.stringify(defaultDoctors));
+            try { localStorage.removeItem('jaseng_did_doctors_v13'); } catch(e) {}
+            renderDID();
+            closeResetConfirm();
+            closeModal();
+        }
+
+        // CSV 내보내기 (순수 한글 단어로 저장)
+        function exportToCSV() {
+            let csv = '\uFEFF'; // UTF-8 BOM (엑셀 한글 깨짐 방지)
+            csv += "ID,성함,직책,진료과목,사진경로,월_오전,월_오후,화_오전,화_오후,수_오전,수_오후,목_오전,목_오후,금_오전,금_오후,토_오전,토_오후,일_오전,일_오후\n";
+
+            doctors.forEach(doc => {
+                const row = [
+                    doc.id,
+                    `"${doc.name.replace(/"/g, '""')}"`,
+                    `"${doc.title.replace(/"/g, '""')}"`,
+                    `"${doc.dept.replace(/"/g, '""')}"`,
+                    `"${doc.photo ? doc.photo : ''}"`,
+                    normalizeStatus(doc.schedule.mon ? doc.schedule.mon[0] : '휴진'), normalizeStatus(doc.schedule.mon ? doc.schedule.mon[1] : '휴진'),
+                    normalizeStatus(doc.schedule.tue ? doc.schedule.tue[0] : '휴진'), normalizeStatus(doc.schedule.tue ? doc.schedule.tue[1] : '휴진'),
+                    normalizeStatus(doc.schedule.wed ? doc.schedule.wed[0] : '휴진'), normalizeStatus(doc.schedule.wed ? doc.schedule.wed[1] : '휴진'),
+                    normalizeStatus(doc.schedule.thu ? doc.schedule.thu[0] : '휴진'), normalizeStatus(doc.schedule.thu ? doc.schedule.thu[1] : '휴진'),
+                    normalizeStatus(doc.schedule.fri ? doc.schedule.fri[0] : '휴진'), normalizeStatus(doc.schedule.fri ? doc.schedule.fri[1] : '휴진'),
+                    normalizeStatus(doc.schedule.sat ? doc.schedule.sat[0] : '휴진'), normalizeStatus(doc.schedule.sat ? doc.schedule.sat[1] : '휴진'),
+                    normalizeStatus(doc.schedule.sun ? doc.schedule.sun[0] : '휴진'), normalizeStatus(doc.schedule.sun ? doc.schedule.sun[1] : '휴진')
+                ].join(",");
+                csv += row + "\n";
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "schedule.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function importFromCSV(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                if (parseAndApplyCSV(event.target.result)) {
+                    renderDID();
+                    openModal();
+                    alert("한글 CSV 데이터를 성공적으로 적용했습니다!");
+                } else {
+                    alert("CSV 파일 형식이 올바르지 않습니다.");
+                }
+                e.target.value = '';
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        let titleClickCount = 0;
+        let titleClickTimer = null;
+        
+        function handleSecretTitleClick() {
+            titleClickCount++;
+            clearTimeout(titleClickTimer);
+            if (titleClickCount >= 5) {
+                openModal();
+                titleClickCount = 0;
+            } else {
+                titleClickTimer = setTimeout(() => { titleClickCount = 0; }, 1500);
+            }
+        }
+        window.handleSecretLogoClick = handleSecretTitleClick;
+
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'F10' || (e.ctrlKey && e.shiftKey && (e.key === 'E' || e.key === 'e'))) {
+                e.preventDefault();
+                openModal();
+            }
+        });
+
+        function adjustScale() {
+            const canvas = document.getElementById('did-canvas');
+            const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+            if (window.innerWidth < 1920 || window.innerHeight < 1080) {
+                canvas.style.transform = `scale(${scale})`;
+                canvas.style.transformOrigin = 'center center';
+            } else {
+                canvas.style.transform = 'none';
+            }
+        }
+
+        setTimeout(() => { window.location.reload(); }, 2 * 60 * 60 * 1000);
+        window.addEventListener('resize', adjustScale);
+
+        window.onload = function() {
+            initData();
+            adjustScale();
+        };
+    </script>
+</body>
+</html>
