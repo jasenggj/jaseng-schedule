@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 캐시 방지 메타 태그 추가 -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -17,7 +16,21 @@
         * { font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         body { margin: 0; padding: 0; background-color: #f1f5f9; color: #1e293b; overflow: hidden; user-select: none; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
         #did-canvas { width: 1920px; height: 1080px; background-color: #f8fafc; display: flex; flex-direction: column; position: relative; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
-        .doctor-card { background: #ffffff; border-radius: 18px; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08); display: flex; flex-direction: column; justify-content: space-between; height: 100%; padding: 12px; overflow: hidden; }
+        
+        /* 🌟 수정포인트 1: 카드 전체를 감싸는 두꺼운 #09335C 테두리 적용 */
+        .doctor-card { 
+            background: #ffffff; 
+            border-radius: 20px; 
+            border: 4px solid #09335C; 
+            box-shadow: 0 10px 25px -5px rgba(9, 51, 92, 0.15); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            height: 100%; 
+            padding: 12px; 
+            overflow: hidden; 
+        }
+        
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -26,7 +39,8 @@
 <body>
 
     <div id="did-canvas">
-        <header class="h-[90px] bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 text-white px-8 flex items-center justify-between border-b-4 border-amber-400 shadow-md flex-shrink-0 relative">
+        <!-- 🌟 수정포인트 2: 상단 진료일정 헤더 배경색을 #09335C 로 통일 -->
+        <header class="h-[90px] bg-[#09335C] text-white px-8 flex items-center justify-between border-b-4 border-amber-400 shadow-md flex-shrink-0 relative">
             <div class="flex-1"></div>
             <div onclick="handleSecretTitleClick()" title="관리자 진입" class="cursor-pointer select-none text-center flex-1">
                 <h1 class="text-4xl font-black tracking-wider leading-none text-white whitespace-nowrap drop-shadow-sm">광주자생한방병원 의료진 진료일정</h1>
@@ -85,24 +99,24 @@
 
     <script>
         const days = [
-            { key: 'mon', label: '월' }, { key: 'tue', label: '화' },
-            { key: 'wed', label: '수' }, { key: 'thu', label: '목' },
-            { key: 'fri', label: '금' }, { key: 'sat', label: '토' },
-            { key: 'sun', label: '일' }
+            { key: 'sun', label: '일' }, { key: 'mon', label: '월' }, 
+            { key: 'tue', label: '화' }, { key: 'wed', label: '수' }, 
+            { key: 'thu', label: '목' }, { key: 'fri', label: '금' }, 
+            { key: 'sat', label: '토' }
         ];
 
         const defaultDoctors = [
-    { id: 1, name: "염승철", title: "병원장", dept: "침구의학과 전문의", photo: "images/doctor1.webp", schedule: { mon:['진료','진료'], tue:['진료','진료'], wed:['휴진','진료'], thu:['휴진','휴진'], fri:['진료','진료'], sat:['진료','진료'], sun:['휴진','휴진'] } },
-    { id: 2, name: "김준수", title: "의무원장", dept: "재활의학과 전문의", photo: "images/doctor2.webp", schedule: { mon:['진료','진료'], tue:['휴진','휴진'], wed:['휴진','휴진'], thu:['진료','진료'], fri:['진료','진료'], sat:['진료','진료'], sun:['휴진','휴진'] } },
-    { id: 3, name: "장영우", title: "원장", dept: "안이비인후피부과 전문의", photo: "images/doctor3.webp", schedule: { mon:['진료','진료'], tue:['휴진','휴진'], wed:['진료','진료'], thu:['부분','야간'], fri:['진료','진료'], sat:['진료','부분'], sun:['휴진','휴진'] } },
-    { id: 4, name: "이일석", title: "원장", dept: "내과 전문의", photo: "images/doctor4.webp", schedule: { mon:['부분','야간'], tue:['진료','진료'], wed:['진료','진료'], thu:['휴진','휴진'], fri:['진료','진료'], sat:['진료','휴진'], sun:['휴진','휴진'] } },
-    { id: 5, name: "김동은", title: "원장", dept: "재활의학과 전문의", photo: "images/doctor5.webp", schedule: { mon:['진료','진료'], tue:['부분','야간'], wed:['휴진','휴진'], thu:['진료','진료'], fri:['진료','진료'], sat:['진료','진료'], sun:['휴진','휴진'] } },
-    { id: 6, name: "이동근", title: "원장", dept: "침구의학과 전문의", photo: "images/doctor6.webp", schedule: { mon:['진료','진료'], tue:['휴진','휴진'], wed:['진료','진료'], thu:['진료','진료'], fri:['부분','야간'], sat:['휴진','휴진'], sun:['휴진','휴진'] } },
-    { id: 7, name: "강경래", title: "원장", dept: "내과 전문의", photo: "images/doctor7.webp", schedule: { mon:['진료','진료'], tue:['진료','진료'], wed:['휴진','휴진'], thu:['진료','진료'], fri:['진료','진료'], sat:['진료','진료'], sun:['휴진','휴진'] } },
-    { id: 8, name: "이영식", title: "원장", dept: "신경정신과 전문의", photo: "images/doctor8.webp", schedule: { mon:['진료','진료'], tue:['휴진','휴진'], wed:['진료','진료'], thu:['진료','진료'], fri:['진료','진료'], sat:['진료','진료'], sun:['휴진','휴진'] } },
-    { id: 9, name: "박주헌", title: "원장", dept: "침구의학과 전문의", photo: "images/doctor9.webp", schedule: { mon:['진료','진료'], tue:['휴진','휴진'], wed:['진료','진료'], thu:['휴진','휴진'], fri:['진료','진료'], sat:['진료','진료'], sun:['휴진','휴진'] } },
-    { id: 10, name: "고민석", title: "원장", dept: "침구의학과 전문의", photo: "images/doctor10.webp", schedule: { mon:['휴진','휴진'], tue:['휴진','휴진'], wed:['휴진','휴진'], thu:['진료','진료'], fri:['진료','부분'], sat:['휴진','휴진'], sun:['진료','진료'] } }
-];
+            { id: 1, name: "염승철", title: "병원장", dept: "침구의학과 전문의", photo: "images/doctor1.webp", schedule: { mon:['진료','진료'], tue:['진료','진료'], wed:['휴진','진료'], thu:['휴진','휴진'], fri:['진료','진료'], sat:['진료','진료'], sun:['휴진','휴진'] } },
+            { id: 2, name: "김준수", title: "의무원장", dept: "재활의학과 전문의", photo: "images/doctor2.webp", schedule: { mon:['진료','진료'], tue:['휴진','휴진'], wed:['휴진','휴진'], thu:['진료','진료'], fri:['진료','진료'], sat:['진료','진료'], sun:['휴진','휴진'] } },
+            { id: 3, name: "장영우", title: "원장", dept: "안이비인후피부과 전문의", photo: "images/doctor3.webp", schedule: { mon:['진료','진료'], tue:['휴진','휴진'], wed:['진료','진료'], thu:['부분','야간'], fri:['진료','진료'], sat:['진료','부분'], sun:['휴진','휴진'] } },
+            { id: 4, name: "이일석", title: "원장", dept: "내과 전문의", photo: "images/doctor4.webp", schedule: { mon:['부분','야간'], tue:['진료','진료'], wed:['진료','진료'], thu:['휴진','휴진'], fri:['진료','진료'], sat:['진료','휴진'], sun:['휴진','휴진'] } },
+            { id: 5, name: "김동은", title: "원장", dept: "재활의학과 전문의", photo: "images/doctor5.webp", schedule: { mon:['진료','진료'], tue:['부분','야간'], wed:['휴진','휴진'], thu:['진료','진료'], fri:['진료','진료'], sat:['진료','진료'], sun:['휴진','휴진'] } },
+            { id: 6, name: "이동근", title: "원장", dept: "침구의학과 전문의", photo: "images/doctor6.webp", schedule: { mon:['진료','진료'], tue:['휴진','휴진'], wed:['진료','진료'], thu:['진료','진료'], fri:['부분','야간'], sat:['휴진','휴진'], sun:['휴진','휴진'] } },
+            { id: 7, name: "강경래", title: "원장", dept: "내과 전문의", photo: "images/doctor7.webp", schedule: { mon:['진료','진료'], tue:['진료','진료'], wed:['휴진','휴진'], thu:['진료','진료'], fri:['진료','진료'], sat:['진료','진료'], sun:['휴진','휴진'] } },
+            { id: 8, name: "이영식", title: "원장", dept: "신경정신과 전문의", photo: "images/doctor8.webp", schedule: { mon:['진료','진료'], tue:['휴진','휴진'], wed:['진료','진료'], thu:['진료','진료'], fri:['진료','진료'], sat:['진료','진료'], sun:['휴진','휴진'] } },
+            { id: 9, name: "박주헌", title: "원장", dept: "침구의학과 전문의", photo: "images/doctor9.webp", schedule: { mon:['진료','진료'], tue:['휴진','휴진'], wed:['진료','진료'], thu:['휴진','휴진'], fri:['진료','진료'], sat:['진료','진료'], sun:['휴진','휴진'] } },
+            { id: 10, name: "고민석", title: "원장", dept: "침구의학과 전문의", photo: "images/doctor10.webp", schedule: { mon:['휴진','휴진'], tue:['휴진','휴진'], wed:['휴진','휴진'], thu:['진료','진료'], fri:['진료','부분'], sat:['휴진','휴진'], sun:['진료','진료'] } }
+        ];
 
         let doctors = [];
 
@@ -115,7 +129,26 @@
             return '휴진';
         }
 
-        // ⭐ 핵심 수정 부분: 깃허브 절대 주소 사용 + 매직인포 캐시 완벽 무력화
+        // 🌟 수정포인트 3: 날짜 표시 형식을 8/3 형태로 변경
+        function getThisWeekDates() {
+            const today = new Date();
+            const currentDay = today.getDay(); 
+            const diffToSunday = -currentDay; 
+            
+            const sunday = new Date(today);
+            sunday.setDate(today.getDate() + diffToSunday);
+
+            const weekDates = {};
+            const keys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+            
+            keys.forEach((key, index) => {
+                const d = new Date(sunday);
+                d.setDate(sunday.getDate() + index);
+                weekDates[key] = `${d.getMonth() + 1}/${d.getDate()}`; // . 대신 / 사용
+            });
+            return weekDates;
+        }
+
         async function loadRemoteCSV() {
             try {
                 const absoluteUrl = 'https://jasenggj.github.io/jaseng-schedule/schedule.csv?nocache=' + new Date().getTime();
@@ -128,9 +161,7 @@
                 if (!response.ok) return false;
                 const text = await response.text();
                 return parseAndApplyCSV(text);
-            } catch (e) {
-                return false;
-            }
+            } catch (e) { return false; }
         }
 
         function parseAndApplyCSV(text) {
@@ -143,24 +174,17 @@
                 if (cols.length >= 17) {
                     const clean = cols.map(c => c.replace(/^"|"$/g, '').trim());
                     newDoctors.push({
-                        id: parseInt(clean[0]) || (i),
-                        name: clean[1], title: clean[2], dept: clean[3], photo: clean[4] || `images/doctor${i}.webp`,
+                        id: parseInt(clean[0]) || (i), name: clean[1], title: clean[2], dept: clean[3], photo: clean[4] || `images/doctor${i}.webp`,
                         schedule: {
-                            mon: [normalizeStatus(clean[5]), normalizeStatus(clean[6])],
-                            tue: [normalizeStatus(clean[7]), normalizeStatus(clean[8])],
-                            wed: [normalizeStatus(clean[9]), normalizeStatus(clean[10])],
-                            thu: [normalizeStatus(clean[11]), normalizeStatus(clean[12])],
-                            fri: [normalizeStatus(clean[13]), normalizeStatus(clean[14])],
-                            sat: [normalizeStatus(clean[15]), normalizeStatus(clean[16])],
+                            mon: [normalizeStatus(clean[5]), normalizeStatus(clean[6])], tue: [normalizeStatus(clean[7]), normalizeStatus(clean[8])],
+                            wed: [normalizeStatus(clean[9]), normalizeStatus(clean[10])], thu: [normalizeStatus(clean[11]), normalizeStatus(clean[12])],
+                            fri: [normalizeStatus(clean[13]), normalizeStatus(clean[14])], sat: [normalizeStatus(clean[15]), normalizeStatus(clean[16])],
                             sun: [normalizeStatus(clean[17]), normalizeStatus(clean[18])]
                         }
                     });
                 }
             }
-            if (newDoctors.length > 0) {
-                doctors = newDoctors;
-                return true;
-            }
+            if (newDoctors.length > 0) { doctors = newDoctors; return true; }
             return false;
         }
 
@@ -168,7 +192,7 @@
             const loadedCSV = await loadRemoteCSV();
             if (!loadedCSV) {
                 try {
-                    const saved = localStorage.getItem('jaseng_did_doctors_v14');
+                    const saved = localStorage.getItem('jaseng_did_doctors_v17');
                     doctors = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(defaultDoctors));
                 } catch (e) { doctors = JSON.parse(JSON.stringify(defaultDoctors)); }
             }
@@ -188,25 +212,41 @@
         function renderDID() {
             const main = document.querySelector('main');
             main.innerHTML = '';
+            const currentWeekDates = getThisWeekDates();
+
             doctors.forEach(doc => {
                 const card = document.createElement('div');
                 card.className = 'doctor-card';
                 const photoPath = doc.photo ? doc.photo : `images/doctor${doc.id}.webp`;
+                
+                // 프로필 형식을 이전의 밝고 깔끔한 형태로 되돌림
                 card.innerHTML = `
-                    <div class="w-full h-[200px] rounded-xl bg-slate-100 border border-slate-200/80 overflow-hidden flex items-center justify-center flex-shrink-0 shadow-inner relative">
+                    <div class="w-full h-[185px] rounded-xl bg-slate-100 border border-slate-200/80 overflow-hidden flex items-center justify-center flex-shrink-0 shadow-inner relative">
                         <img src="${photoPath}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'flex flex-col items-center justify-center text-slate-400 p-2 text-center\\'><i class=\\'fa-solid fa-user-doctor text-5xl mb-2 text-slate-300\\'></i><span class=\\'text-xs font-semibold\\'>사진 준비중</span></div>';" class="w-full h-full object-cover object-top scale-105 origin-top -translate-y-4">
                     </div>
-                    <div class="mt-2 mb-1 px-0.5 flex items-center justify-center gap-1 whitespace-nowrap overflow-hidden">
+                    
+                    <div class="mt-2.5 mb-1.5 px-0.5 flex items-center justify-center gap-1 whitespace-nowrap overflow-hidden">
                         <span class="text-[26px] font-black text-slate-900 leading-none tracking-tight flex-shrink-0">${doc.name}</span>
                         <span class="text-[12px] font-black text-blue-900 bg-blue-100 px-1 py-0.5 rounded border border-blue-200/80 leading-tight flex-shrink-0">${doc.title}</span>
                         <span class="text-[12px] font-bold text-slate-700 leading-none tracking-tighter truncate">| ${doc.dept}</span>
                     </div>
+
                     <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-200/80 flex-grow flex flex-col justify-center w-full">
                         <table class="w-full h-full text-center border-collapse">
-                            <thead><tr class="border-b-2 border-slate-200/80"><th class="pb-1 text-xs text-slate-500 font-extrabold w-8">구분</th>${days.map(d => `<th class="pb-1 text-base font-black text-slate-800 ${d.key==='sun'?'text-rose-600':''}">${d.label}</th>`).join('')}</tr></thead>
+                            <thead>
+                                <tr class="border-b-2 border-slate-200/80">
+                                    <th class="pb-1.5 text-xs text-slate-500 font-extrabold w-8">구분</th>
+                                    ${days.map(d => `
+                                        <th class="pb-1.5 ${d.key==='sun'?'text-rose-600': d.key==='sat'?'text-blue-600':'text-slate-800'}">
+                                            <div class="text-[15px] font-black">${d.label}</div>
+                                            <div class="text-[12px] font-extrabold ${d.key==='sun'?'text-rose-600 bg-rose-100': d.key==='sat'?'text-blue-700 bg-blue-100':'text-[#09335C] bg-slate-200'} mt-1 rounded px-1.5 py-0.5 inline-block tracking-tight">${currentWeekDates[d.key]}</div>
+                                        </th>
+                                    `).join('')}
+                                </tr>
+                            </thead>
                             <tbody class="divide-y divide-slate-200/60">
-                                <tr><td class="py-1.5 text-xs text-slate-700 font-black bg-slate-200/70 rounded">오전</td>${days.map(d => `<td class="py-1.5">${renderStatusBadge(doc.schedule[d.key]?doc.schedule[d.key][0]:'휴진')}</td>`).join('')}</tr>
-                                <tr><td class="py-1.5 text-xs text-slate-700 font-black bg-slate-200/70 rounded">오후</td>${days.map(d => `<td class="py-1.5">${renderStatusBadge(doc.schedule[d.key]?doc.schedule[d.key][1]:'휴진')}</td>`).join('')}</tr>
+                                <tr><td class="py-1.5 text-[11px] text-slate-500 font-black bg-slate-200/50 rounded-tl">오전</td>${days.map(d => `<td class="py-1.5">${renderStatusBadge(doc.schedule[d.key]?doc.schedule[d.key][0]:'휴진')}</td>`).join('')}</tr>
+                                <tr><td class="py-1.5 text-[11px] text-slate-500 font-black bg-slate-200/50 rounded-bl">오후</td>${days.map(d => `<td class="py-1.5">${renderStatusBadge(doc.schedule[d.key]?doc.schedule[d.key][1]:'휴진')}</td>`).join('')}</tr>
                             </tbody>
                         </table>
                     </div>`;
@@ -242,20 +282,19 @@
         }
 
         function closeModal() { document.getElementById('editModal').classList.add('hidden'); }
-
         function saveChanges() {
             doctors.forEach((doc, idx) => {
                 doc.name = document.getElementById(`doc_name_${idx}`).value; doc.title = document.getElementById(`doc_title_${idx}`).value; doc.dept = document.getElementById(`doc_dept_${idx}`).value;
                 if (!doc.schedule) doc.schedule = {};
                 days.forEach(d => { doc.schedule[d.key] = [document.getElementById(`sel_${idx}_${d.key}_0`).value, document.getElementById(`sel_${idx}_${d.key}_1`).value]; });
             });
-            try { localStorage.setItem('jaseng_did_doctors_v14', JSON.stringify(doctors)); } catch(e) {}
+            try { localStorage.setItem('jaseng_did_doctors_v17', JSON.stringify(doctors)); } catch(e) {}
             renderDID(); closeModal();
         }
 
         function showResetConfirm() { document.getElementById('resetConfirmModal').classList.remove('hidden'); }
         function closeResetConfirm() { document.getElementById('resetConfirmModal').classList.add('hidden'); }
-        function executeResetDefaults() { doctors = JSON.parse(JSON.stringify(defaultDoctors)); try { localStorage.removeItem('jaseng_did_doctors_v14'); } catch(e) {} renderDID(); closeResetConfirm(); closeModal(); }
+        function executeResetDefaults() { doctors = JSON.parse(JSON.stringify(defaultDoctors)); try { localStorage.removeItem('jaseng_did_doctors_v17'); } catch(e) {} renderDID(); closeResetConfirm(); closeModal(); }
 
         function exportToCSV() {
             let csv = '\uFEFFID,성함,직책,진료과목,사진경로,월_오전,월_오후,화_오전,화_오후,수_오전,수_오후,목_오전,목_오후,금_오전,금_오후,토_오전,토_오후,일_오전,일_오후\n';
@@ -288,12 +327,7 @@
         }
 
         window.addEventListener('resize', adjustScale);
-
-        // ⭐ 핵심 2: 10분(600000ms)마다 TV 화면 자체를 캐시 없이 무조건 강제 새로고침
-        setTimeout(() => {
-            window.location.href = window.location.pathname + '?reload=' + new Date().getTime();
-        }, 10 * 60 * 1000);
-
+        setTimeout(() => { window.location.href = window.location.pathname + '?reload=' + new Date().getTime(); }, 10 * 60 * 1000);
         window.onload = function() { initData(); adjustScale(); };
     </script>
 </body>
